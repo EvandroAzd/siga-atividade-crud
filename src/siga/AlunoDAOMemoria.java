@@ -1,7 +1,9 @@
 package siga;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Código INICIAL da atividade — CRUD INCOMPLETO e com deslizes PROPOSITAIS.
@@ -26,41 +28,44 @@ import java.util.List;
  */
 public class AlunoDAOMemoria implements AlunoDAO {
 
-    private final List<Aluno> armazem = new ArrayList<>();
+    //private final List<Aluno> armazem = new ArrayList<>();
+    //optei por utilizar Map para otimizar o tempo de busca em O(1) de vez O(n) do List
+    private final Map<String, Aluno> armazem = new HashMap<>();
 
     @Override
     public void inserir(Aluno aluno) {
         // TODO (etapa 1): impedir matrícula duplicada, lançando IllegalStateException.
-        armazem.add(aluno);
+        armazem.put(aluno.getMatricula(), aluno);
     }
 
     @Override
     public Aluno buscarPorMatricula(String matricula) {
-        for (Aluno aluno : armazem) {
-            if (aluno.getMatricula().equals(matricula)) {
-                return aluno;
-            }
-        }
-        return null;   // não encontrado
+        return armazem.get(matricula);
     }
 
     @Override
     public List<Aluno> listarTodos() {
         // DESLIZE 1: devolve a própria coleção interna, sem cópia defensiva.
-        return armazem;
+        //Deslize 1 resolvido, estamos recebendo uma cópia agora
+        return new ArrayList<>(armazem.values()); // estou populando a classe ArrayList a partir do Map
     }
 
     @Override
     public void atualizar(Aluno aluno) {
         // TODO (etapa 1): localizar o aluno pela matrícula e substituí-lo,
         // lançando exceção caso não exista.
-        throw new UnsupportedOperationException("Operação ainda não implementada.");
+        if(armazem.containsKey(aluno.getMatricula())) {
+            armazem.put(aluno.getMatricula(), aluno);
+        }
     }
 
     @Override
     public void remover(String matricula) {
         // DESLIZE 2: não verifica se existia; falha em silêncio.
-        Aluno encontrado = buscarPorMatricula(matricula);
-        armazem.remove(encontrado);   // remove(null) simplesmente não faz nada
+        if(armazem.containsKey(matricula)) {
+            armazem.remove(matricula);
+        }
+        //Aluno encontrado = buscarPorMatricula(matricula);
+        //armazem.remove(encontrado);   // remove(null) simplesmente não faz nada
     }
 }
