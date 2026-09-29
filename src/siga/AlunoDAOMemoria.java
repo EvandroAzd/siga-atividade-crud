@@ -1,9 +1,6 @@
 package siga;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Código INICIAL da atividade — CRUD INCOMPLETO e com deslizes PROPOSITAIS.
@@ -35,19 +32,29 @@ public class AlunoDAOMemoria implements AlunoDAO {
     @Override
     public void inserir(Aluno aluno) {
         // TODO (etapa 1): impedir matrícula duplicada, lançando IllegalStateException.
-        armazem.put(aluno.getMatricula(), aluno);
+        if(armazem.containsKey(aluno.getMatricula())) {
+            throw new IllegalStateException("Essa matricula já foi utilizada");
+        }else{
+            armazem.put(aluno.getMatricula(), aluno);
+        }
+
     }
 
     @Override
     public Aluno buscarPorMatricula(String matricula) {
-        return armazem.get(matricula);
+        if(armazem.get(matricula) != null) {
+            return armazem.get(matricula);
+        }else{
+            throw new IllegalArgumentException("A matricula informada não existe!");
+        }
     }
 
     @Override
     public List<Aluno> listarTodos() {
         // DESLIZE 1: devolve a própria coleção interna, sem cópia defensiva.
         //Deslize 1 resolvido, estamos recebendo uma cópia agora
-        return new ArrayList<>(armazem.values()); // estou populando a classe ArrayList a partir do Map
+        // estou populando a classe ArrayList a partir do Map
+        return new ArrayList<>(armazem.values());
     }
 
     @Override
@@ -56,6 +63,8 @@ public class AlunoDAOMemoria implements AlunoDAO {
         // lançando exceção caso não exista.
         if(armazem.containsKey(aluno.getMatricula())) {
             armazem.put(aluno.getMatricula(), aluno);
+        }else{
+            throw new IllegalStateException("Aluno não encontrado!");
         }
     }
 
@@ -64,6 +73,8 @@ public class AlunoDAOMemoria implements AlunoDAO {
         // DESLIZE 2: não verifica se existia; falha em silêncio.
         if(armazem.containsKey(matricula)) {
             armazem.remove(matricula);
+        }else{
+            throw new NoSuchElementException("Matricula não encontrada.");
         }
         //Aluno encontrado = buscarPorMatricula(matricula);
         //armazem.remove(encontrado);   // remove(null) simplesmente não faz nada
