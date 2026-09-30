@@ -1,4 +1,6 @@
-package siga;
+package siga.dao;
+
+import siga.Aluno;
 
 import java.util.*;
 

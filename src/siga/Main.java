@@ -1,5 +1,9 @@
 package siga;
 
+import siga.dao.AlunoDAO;
+import siga.dao.AlunoDAOMemoria;
+import siga.service.ServicoAluno;
+
 import java.util.List;
 
 /**
