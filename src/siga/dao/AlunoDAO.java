@@ -1,6 +1,6 @@
 package siga.dao;
 
-import siga.Aluno;
+import siga.model.Aluno;
 
 import java.util.List;
 

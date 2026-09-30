@@ -2,6 +2,7 @@ package siga;
 
 import siga.dao.AlunoDAO;
 import siga.dao.AlunoDAOMemoria;
+import siga.model.Aluno;
 import siga.service.ServicoAluno;
 
 import java.util.List;

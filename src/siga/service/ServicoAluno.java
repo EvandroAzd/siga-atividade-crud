@@ -1,6 +1,6 @@
 package siga.service;
 
-import siga.Aluno;
+import siga.model.Aluno;
 import siga.dao.AlunoDAO;
 
 import java.util.List;
@@ -33,12 +33,7 @@ public class ServicoAluno {
 
     public void cadastrar(Aluno aluno) {
         // Validação escrita diretamente aqui (e repetida no Main, com outro limite).
-        if (aluno.getNome() == null || aluno.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome é obrigatório."); // Se não inserir nome para aqui
-        }
-        if (aluno.getMedia() < 0 || aluno.getMedia() > 10) {
-            throw new IllegalArgumentException("Média deve estar entre 0 e 10."); // Se não tiver média entre 0 e 10 para aqui
-        }
+       validar(aluno);
 
         try{
             dao.inserir(aluno); //inserir lançará exceção caso matricula esteja duplicada
@@ -64,12 +59,7 @@ public class ServicoAluno {
     // TODO (etapa 2): implementar alterar(Aluno aluno), validando e
     // garantindo que o aluno exista antes de atualizar.
     public void alterar(Aluno aluno) {
-        if (aluno.getNome() == null || aluno.getNome().isBlank()) {
-            throw new IllegalArgumentException("Nome é obrigatório."); // Se não inserir nome para aqui
-        }
-        if (aluno.getMedia() < 0 || aluno.getMedia() > 10) {
-            throw new IllegalArgumentException("Média deve estar entre 0 e 10."); // Se não tiver média entre 0 e 10 para aqui
-        }
+        validar(aluno);
 
         try{
             dao.atualizar(aluno);
@@ -87,4 +77,14 @@ public class ServicoAluno {
             throw new NoSuchElementException("Aluno não removido: " + ex.getMessage());
         }
     }
+
+    private void validar(Aluno aluno) {
+        if (aluno.getNome() == null || aluno.getNome().isBlank()) {
+            throw new IllegalArgumentException("Nome é obrigatório."); // Se não inserir nome para aqui
+        }
+        if (aluno.getMedia() < 0 || aluno.getMedia() > 10) {
+            throw new IllegalArgumentException("Média deve estar entre 0 e 10."); // Se não tiver média entre 0 e 10 para aqui
+        }
+    }
+
 }

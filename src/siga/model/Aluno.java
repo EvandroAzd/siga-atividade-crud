@@ -1,4 +1,4 @@
-package siga;
+package siga.model;
 
 /**
  * Sistema de Gestão Acadêmica Simplificado (SIGA)
