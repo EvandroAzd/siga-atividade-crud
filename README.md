@@ -1,8 +1,8 @@
-# SIGA — Atividade de CRUD completo e Etapa 1 (código inicial)
+# SIGA — CRUD de Alunos
 
-**Técnicas de Programação II (TP2) · Aula 8** — CST em Desenvolvimento de Software Multiplataforma · Fatec de Porto Ferreira
+**Técnicas de Programação II · Aula 8** — CST em Desenvolvimento de Software Multiplataforma · Fatec de Porto Ferreira
 
-Este é o **código inicial** da atividade prática da Aula 8. O CRUD está **incompleto** e o código contém **três deslizes propositais**, que você deverá corrigir. Ao final, este projeto compõe a entrega da **Etapa 1 do Projeto Integrador**.
+Implementação de um CRUD de alunos usando o padrão **DAO** e uma camada de **serviço**, com tratamento de exceções e encapsulamento correto da coleção interna.
 
 ## Estrutura do projeto
 
@@ -10,11 +10,14 @@ Este é o **código inicial** da atividade prática da Aula 8. O CRUD está **in
 siga-crud/
 └── src/
     └── siga/
-        ├── Aluno.java             (entidade de domínio; pronta)
-        ├── AlunoDAO.java          (interface do DAO, da Aula 7; pronta)
-        ├── AlunoDAOMemoria.java   (CRUD incompleto + deslizes 1 e 2)
-        ├── ServicoAluno.java      (camada de serviço incompleta + deslize 3)
-        └── Main.java              (apresentação; demonstra os deslizes)
+        ├── model/
+        │   └── Aluno.java              (entidade de domínio)
+        ├── dao/
+        │   ├── AlunoDAO.java           (interface do DAO)
+        │   └── AlunoDAOMemoria.java    (implementação em memória com Map)
+        ├── service/
+        │   └── ServicoAluno.java       (regras de negócio e validação)
+        └── Main.java                   (camada de apresentação)
 ```
 
 ## Como compilar e executar
@@ -22,47 +25,80 @@ siga-crud/
 Pré-requisito: JDK 17 ou superior (`java -version` para verificar).
 
 ```bash
-# 1. Compilar (a saída vai para a pasta "bin")
-javac -d bin src/siga/*.java
+# 1. Criar a pasta de saída (apenas na primeira vez)
+mkdir -p bin
 
-# 2. Executar
+# 2. Compilar
+javac -d bin src/siga/model/*.java src/siga/dao/*.java src/siga/service/*.java src/siga/*.java
+
+# 3. Executar
 java -cp bin siga.Main
 ```
 
-Execute e observe a saída: ela **demonstra os três deslizes acontecendo**.
+## Diagrama de classes
 
-## O que está incompleto
+```mermaid
+classDiagram
+    class Aluno {
+        -String nome
+        -String matricula
+        -double media
+        +Aluno(nome, matricula, media)
+        +getNome() String
+        +getMatricula() String
+        +getMedia() double
+        +toString() String
+    }
 
-| Local | Situação |
+    class AlunoDAO {
+        <<interface>>
+        +inserir(Aluno) void
+        +buscarPorMatricula(String) Aluno
+        +listarTodos() List~Aluno~
+        +atualizar(Aluno) void
+        +remover(String) void
+    }
+
+    class AlunoDAOMemoria {
+        -Map~String, Aluno~ armazem
+        +inserir(Aluno) void
+        +buscarPorMatricula(String) Aluno
+        +listarTodos() List~Aluno~
+        +atualizar(Aluno) void
+        +remover(String) void
+    }
+
+    class ServicoAluno {
+        -AlunoDAO dao
+        +ServicoAluno(AlunoDAO)
+        +cadastrar(Aluno) void
+        +listar() List~Aluno~
+        +consultar(Aluno) Aluno
+        +alterar(Aluno) void
+        +excluir(String) void
+        -validar(Aluno) void
+    }
+
+    class Main {
+        +main(String[])$ void
+        -cadastrar(ServicoAluno, Aluno)$ void
+        -alterar(ServicoAluno, Aluno)$ void
+        -excluir(ServicoAluno, String)$ void
+    }
+
+    AlunoDAO <|.. AlunoDAOMemoria : implementa
+    ServicoAluno --> AlunoDAO : usa
+    Main --> ServicoAluno : usa
+    AlunoDAOMemoria ..> Aluno
+    ServicoAluno ..> Aluno
+```
+
+## Decisões de design
+
+| Decisão | Justificativa |
 |---|---|
-| `AlunoDAOMemoria.inserir` | Não impede matrícula duplicada |
-| `AlunoDAOMemoria.atualizar` | Não implementado (lança `UnsupportedOperationException`) |
-| `ServicoAluno` | Faltam `consultar`, `alterar` e `excluir` |
-
-## Os três deslizes propositais
-
-| # | Deslize | Onde | Por que é um problema |
-|---|---|---|---|
-| 1 | **Coleção interna exposta** | `AlunoDAOMemoria.listarTodos` | Devolve a própria lista interna; a tela consegue inserir um aluno sem passar pelo serviço, quebrando o encapsulamento. |
-| 2 | **Exclusão silenciosa** | `AlunoDAOMemoria.remover` | Não verifica se o registro existia; o usuário recebe confirmação de uma operação que não ocorreu. |
-| 3 | **Validação duplicada e divergente** | `ServicoAluno` e `Main` | A regra da média está nos dois lugares, com limites diferentes (0..10 e 0..100). Regra duplicada diverge com o tempo. |
-
-## Sua tarefa
-
-Siga as etapas da ficha de atividade prática:
-
-1. **Completar o CRUD** no `AlunoDAOMemoria`: impedir matrícula duplicada em `inserir` e implementar `atualizar`, verificando a existência do registro.
-2. **Implementar a camada de serviço**: `consultar`, `alterar` e `excluir` no `ServicoAluno`, extraindo a validação para um método privado `validar(Aluno)` reutilizado pelas operações.
-3. **Corrigir os três deslizes**: cópia defensiva em `listarTodos`, verificação de existência em `remover` e eliminação da validação duplicada na apresentação (a regra do domínio fica **apenas** no serviço).
-4. **Tratar as exceções** na camada de apresentação, com mensagens claras e específicas — e sem blocos `catch` vazios.
-5. **Consolidar a Etapa 1** no repositório, com README e commits descritivos.
-
-## Critério de sucesso
-
-Ao final: (a) as **quatro operações** do CRUD funcionam; (b) a regra da média existe em **um único lugar**; (c) a tela **não consegue** alterar a coleção interna do DAO; e (d) excluir uma matrícula inexistente produz **mensagem de erro**, não de sucesso.
-
-## Padrão de entrega
-
-Conforme a ficha de atividade prática: identificadores em português, um arquivo `.java` por classe pública, código formatado, entrega no repositório Git com README e commits descritivos. O uso de IA para gerar o código é proibido nesta atividade (ver seção 5.3 da ficha).
-
-> **Etapa 1 do Projeto Integrador:** além desta atividade, a entrega inclui o modelo de domínio, o diagrama de classes, ao menos um padrão criacional justificado e a documentação das decisões de design. Consulte a Seção 10 da apostila da Aula 8.
+| `Map<String, Aluno>` no DAO | Busca por matrícula em O(1) em vez de percorrer uma lista |
+| Cópia defensiva em `listarTodos` | Impede que a camada de apresentação altere a coleção interna sem passar pelo serviço |
+| Validação centralizada em `validar()` | Regra da média existe em um único lugar; alterá-la não cria divergências |
+| Exceções semânticas (`IllegalArgumentException`, `IllegalStateException`, `NoSuchElementException`) | Cada exceção comunica o motivo do erro sem exigir mensagens genéricas |
+| Injeção de dependência no `ServicoAluno` | Permite trocar a implementação do DAO (memória, banco, arquivo) sem alterar o serviço |
